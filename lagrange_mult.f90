@@ -1,9 +1,9 @@
 ! Atualiza o valor de lambda
 
 subroutine lagrange_mult(lambda, lambda_old, x)
-    use optim_config
+    use optim_funcs
     implicit none
-
+    
     double precision, intent(in) :: x(n)
     double precision, intent(inout) :: lambda(q), lambda_old(q)
 

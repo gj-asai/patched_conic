@@ -1,5 +1,5 @@
 subroutine restoration(y)
-    use optim_config
+    use optim_funcs
     implicit none
 
     double precision, intent(inout) :: y(n)

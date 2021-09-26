@@ -2,9 +2,9 @@
 ! Usa quasilinearizacao, com derivadas numericas
 
 subroutine stepsize(alpha,x,p,lambda)
-    use optim_config
+    use optim_funcs
     implicit none
-
+    
     double precision, intent(in) :: x(n), lambda(q), p(n)
     double precision, intent(out) :: alpha
 

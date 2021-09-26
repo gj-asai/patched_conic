@@ -2,9 +2,9 @@
 ! O valor de x e atualizado em sgra_conjugate, somente se representar descida em f apos a restauracao
 
 subroutine gradient(xold, x, p, alpha, lambda, lambda_old)
-    use optim_config
+    use optim_funcs
     implicit none
-
+    
     double precision, intent(in) :: x(n), xold(n), lambda(q), lambda_old(q)
     double precision, intent(inout) :: p(n)
     double precision, intent(out) :: alpha

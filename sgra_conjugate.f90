@@ -1,5 +1,5 @@
 subroutine sgra_conjugate(x)
-    use optim_config
+    use optim_funcs
     implicit none
     
     double precision, intent(inout) :: x(n)

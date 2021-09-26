@@ -1,5 +1,5 @@
+! Funcao a ser otimizada
 double precision function f(x) result(deltav)
-    use physical_param
     implicit none
     
     double precision, intent(in) :: x(n)

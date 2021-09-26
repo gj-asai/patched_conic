@@ -1,6 +1,9 @@
+! Restricoes do problema
 function phi(x)
-    use physical_param
     implicit none
+    
+    common /physical/ D, mu_e, Re, mu_m, Rm, vm, wm, Rs, r0, rf, phi0
+    double precision :: D, mu_e, Re, mu_m, Rm, vm, wm, Rs, r0, rf, phi0
     
     double precision, intent(in) :: x(n)
     double precision :: phi(q)

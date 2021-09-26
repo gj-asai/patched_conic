@@ -3,11 +3,13 @@
 ! Depois deve ser verificado se e igual a orbita final desejada
 
 subroutine patched_conic(v0, lambda1, rpm, deltav)
-    use physical_param
     implicit none
-
+    
     double precision, intent(in) :: v0, lambda1
     double precision, intent(out) :: rpm, deltav
+    
+    common /physical/ D, mu_e, Re, mu_m, Rm, vm, wm, Rs, r0, rf, phi0
+    double precision :: D, mu_e, Re, mu_m, Rm, vm, wm, Rs, r0, rf, phi0
     
     double precision :: energye, he, r1, r2, gamma1, v1, phi1
     double precision :: epsilon2, v2

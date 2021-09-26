@@ -7,7 +7,8 @@ subroutine newton_raphson(r0, rf, v0, lambda1)
     double precision :: rpm, deltav
     double precision :: v1, v2, rpm1, rpm2, d_rpm, deltav0
     
-    double precision, parameter :: dv0 = 1d-6, tol = 1d-12
+    common /bvp/ dv0, tol
+    double precision :: dv0, tol
     
     do
         call patched_conic(v0, lambda1, rpm, deltav)
