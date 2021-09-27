@@ -6,16 +6,19 @@ subroutine plot_trajectory(v0, lambda1, deltav, deltav1, deltav2, deltat, gamma0
     double precision, intent(in) :: v0, lambda1
     double precision, intent(out) :: deltav, deltav1, deltav2, deltat, gamma0
     
+    common /angles/ deg2rad, rad2deg
+    double precision :: deg2rad, rad2deg
+    
     common /physical/ D, mu_e, Re, mu_m, Rm, vm, wm, Rs, r0, rf, phi0
     double precision :: D, mu_e, Re, mu_m, Rm, vm, wm, Rs, r0, rf, phi0
     
     double precision :: energye, he, pe, ae, ee, r1, r2, gamma1, v1, phi1
     double precision :: epsilon2, v2
     double precision :: energym, hm, pm, am, em, vpm, rpm
-    double precision :: E1, F2, deltat_e, deltat_m
-    double precision :: f1
+    double precision :: E0, E1, E2, H2, M2, deltat_e, deltat_m
+    double precision :: f1, f2, deltaE, deltaH, w_pm, Ei, Hi, ri, fi, xi, yi, Mi, ti
     
-    integer :: i
+    integer :: i, npontos
     
     ! Orbita geocentrica
     energye = v0**2/2 - mu_e/r0
@@ -55,20 +58,103 @@ subroutine plot_trajectory(v0, lambda1, deltav, deltav1, deltav2, deltat, gamma0
     deltav = deltav1 + deltav2
     
     ! Tempo de viagem
-    E1 = acos(1/ee * (1 - r1/ae))
-    F2 = acosh(1/em * (1 - r2/am))
+    E1 = acos(1/ee * (1-r1/ae))
+    deltat_e = sqrt(ae**3/mu_e) * (E1-ee*sin(E1))
     
-    deltat_e = sqrt(ae**3/mu_e) * (E1 - ee*sin(E1))
-    deltat_m = sqrt((-am)**3/mu_m) * (em*sinh(F2) - F2)
+    if (energym.lt.0) then ! Orbita selenocentrica eliptica
+        E2 = -acos(1/em * (1-r2/am))
+        deltat_m = sqrt(am**3/mu_m) * (-E2+em*sin(E2))
+    else                   ! Orbita selenocentrica hiperbolica
+        H2 = -acosh(1/em * (1-r2/am))
+        deltat_m = sqrt(-am**3/mu_m) * (-em*sinh(H2)+H2)
+    end if
+    
     deltat = deltat_e + deltat_m
     
     ! Angulo de saida da terra
-    f1 = acos((cos(E1) - ee)/(1 - ee*cos(E1)))
-    gamma0 = f1 - gamma1 - wm*deltat_e
+    f1 = 2*atan(sqrt((1+ee)/(1-ee))*tan(E1/2)) 
+    gamma0 = -f1 + gamma1 + wm*deltat_e
+    
+    ! Salva parametros importantes
+    open(1, file='resultados.dat')
+    write(1,*), 'v0      =', v0, 'km/s'
+    write(1,*), 'lambda1 =', lambda1*rad2deg, 'graus'
+    write(1,*), 'gamma0  =', gamma0*rad2deg, 'graus'
+    write(1,*), ''
+    write(1,*), 'deltav  =', deltav, 'km/s'
+    write(1,*), 'deltav1 =', deltav1, 'km/s'
+    write(1,*), 'deltav2 =', deltav2, 'km/s'
+    write(1,*), ''
+    write(1,*), 'deltat  =', deltat/3600/24, 'dias'
+    close(1)
     
     ! Plot da trajetoria
-    open(1, file = 'trajetoria.dat')
-    write(1,'(3a25)'), 'X [km]', 'Y [km]', 'T [dias]'
+    ! Pontos:
+    ! 0: Inicio da trajetoria geocentrica
+    ! 1: Fim da trajetoria geocentrica
+    ! 2: Inicio da trajetoria selenocentrica
+    open(2, file = 'trajetoria.dat')
+    write(2,'(3a25)'), 'X [km]', 'Y [km]', 'T [dias]'
+    npontos = 1000
     
-    close(1)
+    ! Trajetoria geocentrica
+    deltaE = E1/(npontos-1)
+    do i = 0,npontos-1
+        Ei = deltaE*i
+        ri = ae*(1-ee*cos(Ei))
+        fi = 2*atan(sqrt((1+ee)/(1-ee))*tan(Ei/2))
+        
+        xi = ri*cos(gamma0 + fi)
+        yi = ri*sin(gamma0 + fi)
+        
+        Mi = Ei - ee*sin(Ei)
+        ti = Mi*sqrt(ae**3/mu_e)
+        
+        write(2,'(3f)'), xi, yi, ti/3600/24
+    end do
+    
+    ! Trajetoria selenocentrica
+    if (energym.lt.0) then
+        M2 = E2 - em*sin(E2)
+        f2 = 2*atan(sqrt((1+em)/(1-em))*tan(E2/2))
+        w_pm = -lambda1 - f2 + 180*deg2rad + wm*deltat_e
+        
+        deltaE = -E2/npontos
+        
+        do i = 1,npontos
+            Ei = E2 + deltaE*i
+            ri = am*(1-em*cos(Ei))
+            fi = 2*atan(sqrt((1+em)/(1-em))*tan(Ei/2))
+            
+            Mi = Ei - em*sin(Ei)
+            ti = deltat_e + (Mi-M2)*sqrt(am**3/mu_m)
+            
+            xi = ri*cos(w_pm + fi) + D*cos(wm*ti)
+            yi = ri*sin(w_pm + fi) + D*sin(wm*ti)
+            
+            write(2,'(3f)'), xi, yi, ti/3600/24
+        end do
+    else
+        M2 = em*sinh(H2) - H2
+        f2 = 2*atan(sqrt((1+em)/(em-1))*tanh(H2/2))
+        w_pm = -lambda1 - f2 + 180*deg2rad + wm*deltat_e
+        
+        deltaH = -H2/npontos
+        
+        do i = 1,npontos
+            Hi = H2 + deltaH*i
+            ri = am*(1-em*cosh(Hi))
+            fi = 2*atan(sqrt((1+em)/(em-1))*tanh(Hi/2))
+            
+            Mi = em*sinh(Hi) - Hi
+            ti = deltat_e + (Mi-M2)*sqrt(-am**3/mu_m)
+            
+            xi = ri*cos(w_pm + fi) + D*cos(wm*ti)
+            yi = ri*sin(w_pm + fi) + D*sin(wm*ti)
+            
+            write(2,'(3f)'), xi, yi, ti/3600/24
+        end do
+    end if
+    
+    close(2)
 end subroutine

@@ -16,7 +16,7 @@ subroutine optimize()
     double precision :: v0, lambda1, deltav, deltav1, deltav2, deltat, gamma0
     double precision :: x(n)
     
-    lambda1 = 60*deg2rad ! Valor para inicio da otimizacao
+    lambda1 = 50*deg2rad ! Valor para inicio da otimizacao
     call hohmann(v0) ! Chute para v0
     call newton_raphson(r0, rf, v0, lambda1) ! Calcula v0 correto para lambda1
     

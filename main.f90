@@ -14,7 +14,7 @@ program optimization
     double precision :: theta2 = 1e-15     ! Criterio de parada da fase de restauracao: P(x) <= theta2, P(x) = phi_T(x) * phi(x)
     double precision :: theta3 = 1e-12     ! Criterio de parada do algoritmo: Q(x) <= theta3, Q(x) = F_x_T(x,lambda) * F_x(x,lambda)
     
-    call physical_param(463d0, 100d0) ! Altura das orbitas inicial e final
+    call physical_param(167d0, 100d0) ! Altura das orbitas inicial e final
     
     call boundary_value() ! Constroi curva lambda1 vs deltav
     call optimize()       ! Encontra lambda1 de deltav minimo
